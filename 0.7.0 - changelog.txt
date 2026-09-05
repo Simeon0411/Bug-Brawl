@@ -1,0 +1,7 @@
+3/3/2026
+
+Added Hp
+Added UI bars for flight and Hp
+Added respawn
+Fixed a bug where the player took multiple hits from a single attack
+Changed the game loop

@@ -1,0 +1,4 @@
+14/3/2026
+
+finally added projectiles
+Found a bug where if you can climb, and climb a wall with no ceiling, you can levitate indefenetly

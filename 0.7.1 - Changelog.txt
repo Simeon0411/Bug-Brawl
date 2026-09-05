@@ -1,0 +1,4 @@
+4/3/2026
+
+Fixed an error where the flight bar shows while on a wall
+Fixed a bug where if you walk of an edge, you dont recover the full flight

@@ -1,0 +1,1 @@
+added platforms and fixed bugs. also changed map layout and added sprites for mantis.

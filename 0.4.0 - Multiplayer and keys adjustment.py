@@ -1,0 +1,129 @@
+import pygame
+pygame.init()
+#player stats#
+CharacterWalkSpeed = [2]
+CharacterRunSpeed = [4]
+CharacterAirSpeed = [0.6]
+CharacterJumpHeight = [1]
+CharacterGravity = [1]
+CharacterFlight = [30]
+running = True
+screen = pygame.display.set_mode((800, 600)) 
+keys = pygame.key.get_pressed()
+block = [pygame.Rect(0, 500, 800, 40), pygame.Rect(400, 460, 80, 80), pygame.Rect(400, 460, 80, 80)]
+attacks = []
+class player():
+    def __init__(self, X, Y, character):
+        self.character = character
+        self.X = X
+        self.Y = Y
+        self.VX = 0
+        self.VY = 0
+        self.hitbox = pygame.Rect(self.X, self.Y, 30, 50)
+        self.grounded = False
+        self.jumpTimer = 0
+        self.dashTimer = 0
+        self.dashing = 0
+        self.flight = 0
+        self.flightTimer = 0
+        self.atktest = 1
+    class attack:
+        def __init__(self, pl, attackX, attackY, atkSizeX, atkSizeY, damage, angleX, angleY, launch, sender):
+            self.X = pl.X
+            self.Y = pl.Y
+            self.attackX = attackX
+            self.attackY = attackY
+            self.atkSizeX = atkSizeX
+            self.atkSizeY = atkSizeY
+            self.damage = damage
+            self.angleX = angleX
+            self.angleY = angleY
+            self.launch = launch
+            self.sender = sender
+            attacks.append((pygame.Rect(self.X + self.attackX, self.Y + self.attackY, self.atkSizeX, self.atkSizeY), self.damage, self.angleX, self.angleY, self.launch, self.sender))
+    def movement(self, UP, LEFT, DOWN, RIGHT, ATTACK, SHIELD):
+        self.UP = UP
+        self.LEFT = LEFT
+        self.DOWN = DOWN
+        self.RIGHT = RIGHT
+        self.RIGHT = RIGHT
+        self.ATTACK = ATTACK
+        self.SHIELD = SHIELD
+        if ATTACK and self.atktest == 1:
+            self.Attack = self.attack(self, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            self.atktest = 0
+        if LEFT:
+            if self.dashTimer < 0 and self.dashTimer > -9:
+                self.dashing = -1
+            else:
+                self.dashTimer = -10
+        if RIGHT:
+            if self.dashTimer > 0 and self.dashTimer < 9:
+                self.dashing = 1
+            else:
+                self.dashTimer = 10
+        self.dashTimer -= 1 if self.dashTimer > 0 else -1 if self.dashTimer < 0 else 0
+        if not(RIGHT) and not(LEFT) or LEFT and RIGHT or not(self.grounded == 1):
+            self.dashing = 0
+        self.VX += ((RIGHT - LEFT - self.dashing) * CharacterWalkSpeed[self.character] if self.dashing == 0 else CharacterRunSpeed[self.character] * -1 if self.VX < 0 else CharacterRunSpeed[self.character]) if self.grounded == 1 else (RIGHT - LEFT) * CharacterAirSpeed[self.character]  #caminar
+        self.VX *= 0.7 if self.grounded == 1 else 0.9
+        if UP and self.grounded: #salto
+            self.VY = -10 * CharacterJumpHeight[self.character]
+            self.jumpTimer = 10
+            self.flight = CharacterFlight[self.character]
+            self.flightTimer = 20
+        if UP and not(self.grounded) and self.jumpTimer > 0:
+            self.VY -= 1
+        elif UP and not(self.grounded) and self.flight > 0 and self.flightTimer == 0:
+            self.VY -= 2 if self.VY > 0 else 1.5
+            if self.VY < -8:
+                self.VY = -8
+            self.flight -= 1 if self.flight > 0 else 0
+        self.VY += 1 * CharacterGravity[self.character] #gravedad
+        if self.VY > 10:
+            self.VY = 10
+        self.jumpTimer -= 1 if self.jumpTimer > 0 else 0
+        self.flightTimer -= 1 if self.flightTimer > 0 else 0
+        self.collide()
+
+    def collide(self):
+        self.X += self.VX
+        self.hitbox = pygame.Rect(self.X, self.Y, 30, 50)
+        collided = any(self.hitbox.colliderect(rect) for rect in block)
+        while any(self.hitbox.colliderect(rect) for rect in block):
+            self.X -= 1 if self.VX > 0 else -1
+            self.hitbox = pygame.Rect(self.X, self.Y, 30, 50)
+        if collided:
+            self.VX = 0
+        
+        self.Y += self.VY
+        self.hitbox = pygame.Rect(self.X, self.Y, 30, 50)
+        collided = any(self.hitbox.colliderect(rect) for rect in block)
+        while any(self.hitbox.colliderect(rect) for rect in block):
+            self.Y -= 1 if self.VY > 0 else -1
+            self.hitbox = pygame.Rect(self.X, self.Y, 30, 50)
+        if collided:
+            self.VY = 0
+            self.grounded = True
+        else:
+            self.grounded = False
+
+
+p1 = player(400, 300, 0)
+p2 = player(400, 300, 0)
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    keys = pygame.key.get_pressed()
+    DT = pygame.time.Clock().tick(60) / 60 * 1000
+    p1.movement(keys[pygame.K_w], keys[pygame.K_a], keys[pygame.K_s], keys[pygame.K_d], keys[pygame.K_f], keys[pygame.K_g])
+    p2.movement(keys[pygame.K_UP], keys[pygame.K_LEFT], keys[pygame.K_DOWN], keys[pygame.K_RIGHT], keys[pygame.K_COMMA], keys[pygame.K_PERIOD])
+    screen.fill((0, 0, 0))
+    pygame.draw.rect(screen, (255, 0, 0), p1.hitbox, 3, border_radius=20)
+    pygame.draw.rect(screen, (0, 0, 255), p2.hitbox, 3, border_radius=20)
+    pygame.draw.rect(screen, (0, 255, 0), block[0])
+    pygame.draw.rect(screen, (0, 255, 0), block[1])
+    pygame.display.flip()
+    print(f"{attacks}")
+pygame.quit()

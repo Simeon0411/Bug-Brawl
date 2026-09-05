@@ -1,0 +1,6 @@
+14/3/2026
+
+Fixed the levitation wall climb bug.
+Fixed another levitation bug where climbing a wall while attacking makes you levitate.
+Now projectiles dont go through walls.
+Now you cant make attacks while in a wall.

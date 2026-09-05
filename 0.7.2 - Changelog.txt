@@ -1,0 +1,6 @@
+4/3/2026
+
+Added big walls to prevent players from falling
+Added death from falling to avoid players suffer ethernaly in hell
+Added nair, dair and uair.
+Added vertical bounce from geting hit
